@@ -1,0 +1,163 @@
+// This file is part of www.nand2tetris.org
+// and the book "The Elements of Computing Systems"
+// by Nisan and Schocken, MIT Press.
+// File name: projects/12/Math.jack
+
+/**
+ * A basic math library.
+ */
+class Math {
+	static Array twoToThe;
+	static int n, divProductVar;
+	
+    /** Initializes the library. */
+    function void init() {
+		var int i, temp;
+		
+		let n = 16;		
+		let twoToThe = Array.new(n);		
+		let twoToThe[0] = 1;
+		let temp = 1;
+				
+		let i = 1;
+		while (i < n) {		
+			let temp = temp + temp;
+			let twoToThe[i] = temp;
+			let i = i + 1;
+		}
+		
+		return;
+    }
+
+    /** Returns the absolute value of x. */
+    function int abs(int x) {
+		var int absX;
+		let absX = x;
+		if (x < 0) {			
+            let absX = -x;
+        }
+		
+        return absX;
+    }
+
+    /** Returns the product of x and y. */
+    function int multiply(int x, int y) {
+		var int sum, shiftedX, j;
+		let sum = 0;
+		let shiftedX = x;
+		let j = 0;
+		
+		while (j < n) {
+			if (bit(y,j)) {
+				let sum = sum + shiftedX;
+			}
+			let shiftedX = shiftedX + shiftedX;
+			let j = j + 1;
+		}
+		
+		return sum;
+    }
+
+    /** Returns the integer part of x/y. */
+    function int divide(int x, int y) {
+		var int result;	
+		
+		if (y = 0) {
+			// Invalid operation: division by 0.
+			do Sys.error(3);
+		}
+		
+		let divProductVar = 0;		
+		let result = dividePositive(abs(x),abs(y));
+			
+		if(((x < 0) & (y > 0)) | ((x > 0) & (y < 0))) {
+			let result = -result;		
+		}		
+			
+		return result;
+    }
+
+	/** Returns the integer part of x/y, where x ≥ 0 and y > 0. */
+    function int dividePositive(int x, int y) {
+		var int q, twoTimesQ;
+		
+		if (y < 0) {
+			// Variable overflow.
+			do Sys.error(3);
+		}
+
+		if (y > x) {
+			return 0;
+		}			
+		let q = dividePositive(x,y + y);
+		let twoTimesQ = q + q;
+		
+		// If q is an odd number
+		if (bit(q, 0)) {
+			let divProductVar = divProductVar + y + y;
+		}		
+			
+		if ((x - divProductVar) < y) {
+			return twoTimesQ;
+		}
+		else  {
+			return twoTimesQ + 1;
+		}	
+	}
+	
+    /** Returns the integer part of the square root of x. */
+    function int sqrt(int x) {
+		var int y, j, tempY;
+		
+		if (x < 0) {
+			do Sys.error(4);
+		}
+		
+		let y = 0;
+		let j = divide(n,2) - 1;
+		
+		while (j > -1) {
+			let tempY = y + twoToThe[j];
+			let tempY = multiply(tempY,tempY);
+			if (((tempY < x) | (tempY = x)) & (tempY > 0)) {
+				let y = y + twoToThe[j];
+			}
+			let j = j - 1;
+		}
+		
+		return y;
+    }
+
+    /** Returns the greater number. */
+    function int max(int a, int b) {
+		var int max;
+		let max = a;
+		if (a < b) {			
+            let max = b;
+        }
+		
+        return max;
+    }
+
+    /** Returns the smaller number. */
+    function int min(int a, int b) {
+		var int min;
+		let min = b;
+		if (a < b) {			
+            let min = a;
+        }
+		
+        return min;
+    }
+	
+	/**  Returns true if the j-th bit of the integer x is 1 and false otherwise. */
+    function boolean bit(int x, int j) {
+		var boolean result;
+		let result = true;
+		if ((x & twoToThe[j]) = 0) {			
+            let result = false;
+        }
+		
+        return result;
+    }
+}

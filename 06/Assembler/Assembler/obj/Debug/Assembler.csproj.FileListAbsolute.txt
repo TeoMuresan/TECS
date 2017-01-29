@@ -1,0 +1,6 @@
+D:\Stuff\TECS\projects\06\Assembler\Assembler\bin\Debug\Assembler.exe.config
+D:\Stuff\TECS\projects\06\Assembler\Assembler\obj\Debug\Assembler.csprojResolveAssemblyReference.cache
+D:\Stuff\TECS\projects\06\Assembler\Assembler\bin\Debug\Assembler.exe
+D:\Stuff\TECS\projects\06\Assembler\Assembler\bin\Debug\Assembler.pdb
+D:\Stuff\TECS\projects\06\Assembler\Assembler\obj\Debug\Assembler.exe
+D:\Stuff\TECS\projects\06\Assembler\Assembler\obj\Debug\Assembler.pdb

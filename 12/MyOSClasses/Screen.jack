@@ -1,0 +1,286 @@
+// This file is part of www.nand2tetris.org
+// and the book "The Elements of Computing Systems"
+// by Nisan and Schocken, MIT Press.
+// File name: projects/12/Screen.jack
+
+/**
+ * Graphic screen library.
+ */
+class Screen {
+
+	// bitMasks[i] = 2^i, i=0,15.
+	// bitMasks is used for bitwise operations when drawing a pixel.
+	static Array screenMap, bitMasks;
+	static boolean currentColor;
+	
+    /** Initializes the Screen. */
+    function void init() {
+		var int i, mask;
+		
+		let screenMap = 16384;
+		let currentColor = true;
+		let bitMasks = Array.new(16);
+		
+		let mask = 1;
+		let i = 0;
+		while (i < 16) {
+			let bitMasks[i] = mask;
+			let mask = mask + mask;
+			let i = i + 1;
+		}
+		
+		return;
+    }
+
+    /** Erases the whole screen. */
+    function void clearScreen() {
+		var int i;
+		
+		let i = 0;
+		// 8192 = 256 (screen_row_count) * 32 (screen_row_word_count).
+		while (i < 8192) {
+			// Clear each word on the screen.
+			let screenMap[i] = 0;
+			let i = i + 1;
+		}
+		
+		return;
+    }
+
+    /** Sets the color to be used in further draw commands
+     *  where white = false, black = true. */
+    function void setColor(boolean b) {
+		let currentColor = b;
+		return;
+    }
+
+    /** Draws the (x, y) pixel. */
+    function void drawPixel(int x, int y) {
+		var int wordIndex, noOfWordsPerLastRow, pixelIndex;
+		
+		if ((x < 0) | (x > 511) | (y < 0) |(y > 255)) {
+			do Sys.error(7);
+		}
+		
+		let noOfWordsPerLastRow = x / 16;
+		let wordIndex = 32 * y + noOfWordsPerLastRow;
+		let pixelIndex = x - (16 * noOfWordsPerLastRow);
+		
+		do updateLocation(wordIndex, pixelIndex);
+		
+		return;
+    }
+
+	/** Sets the pixel with the given index in the given word to the current color.
+	 *  E.g. pixelIndex=7:
+	 *  		currentColor=true: screenMap[pixelWord] = screenMap[pixelWord] | 0000000010000000;
+	 *  		currentColor=false: screenMap[pixelWord] = screenMap[pixelWord] & (1111111101111111).
+	 */
+	function void updateLocation(int pixelWord, int pixelIndex) {
+		var int updatedWord;
+		
+		if (currentColor) {
+			let updatedWord = screenMap[pixelWord] | bitMasks[pixelIndex];
+		}
+		else {
+			let updatedWord = screenMap[pixelWord] & (~bitMasks[pixelIndex]);
+		}		
+		let screenMap[pixelWord] = updatedWord;
+		
+		return;
+	}
+	
+    /** Draws a line from (x1, y1) to (x2, y2). */
+    function void drawLine(int x1, int y1, int x2, int y2) {
+		var int dx, dy;
+		var int dxInPixels, dyInPixels;
+		var int absDx, absDy;
+		var int startPointX, startPointY;
+		var int a, b, adyMinusbdx, bChangeUnit;
+				
+		if ((x1 < 0) | (x1 > 511) | (y1 < 0) | (y1 > 255) |
+			(x2 < 0) | (x2 > 511) | (y2 < 0) | (y2 > 255)) {
+			do Sys.error(8);
+		}
+		
+		let dx = x2 - x1;
+		let dy = y2 - y1;
+		
+		// dx<0 means (x2,y2) is above (x1,y1).
+		// (dx = 0) & (dy < 0) means (x2,y2) is to the left of (x1,y1).
+		// In either of these cases, (x2,y2) should be the starting point.
+		if ((dx < 0) | ((dx = 0) & (dy < 0))) {
+			let startPointX = x2;
+			let startPointY = y2;
+		}
+		else {
+			let startPointX = x1;
+			let startPointY = y1;
+		}
+			
+		let absDx = Math.abs(dx);
+		let absDy = Math.abs(dy);
+		let dxInPixels = absDx + 1;
+		let dyInPixels = absDy + 1;
+		
+		if (dx = 0) {
+			do drawVerticalLine(startPointX, startPointY, dyInPixels);
+		}
+		else {
+			if (dy = 0) {
+				do drawHorizontalLine(startPointX, startPointY, dxInPixels);
+			}
+			// The line is neither vertical, nor horizontal.
+			else {
+				let a = 0;
+				let b = 0;
+				let adyMinusbdx = 0;
+				
+				// If the line decreases from left to right.
+				if (((dx < 0) & (dy < 0)) | ((dx > 0) & (dy > 0))) {
+					// The Y coordinate increases when drawing the line.
+					let bChangeUnit = 1;
+				}
+				// If the line decreases from right to left.
+				else {
+					// The Y coordinate decreases when drawing the line.
+					let bChangeUnit = -1;
+				}
+				
+				while ((a < dxInPixels) & (b < dyInPixels)) {
+					do drawPixel(startPointX + a, startPointY + b);
+					if (adyMinusbdx < 0) {
+						let a = a + 1;
+						let adyMinusbdx = adyMinusbdx + absDy;
+					}
+					else {
+						let b = b + bChangeUnit;
+						let adyMinusbdx = adyMinusbdx - absDx;
+					}
+				}														
+			}
+		}		
+		return;
+    }
+
+	/** Draws a horizontal line starting at (x, y) and of length dx, left to right. 
+	 */
+	function void drawHorizontalLine(int x, int y, int dx) {
+		var int i, noOfWordsPerLastRow, wordIndex, pixelIndex;
+
+		let noOfWordsPerLastRow = x / 16;
+		let wordIndex = 32 * y + noOfWordsPerLastRow;
+		let pixelIndex = x - (16 * noOfWordsPerLastRow);
+					
+		let i = 0;
+		while(i < dx) {
+			do updateLocation(wordIndex, pixelIndex);
+			if (pixelIndex < 15) {
+				let pixelIndex = pixelIndex + 1;
+			}
+			else {
+				let pixelIndex = 0;
+				let wordIndex = wordIndex + 1;
+			}
+					
+			let i = i + 1;
+		}
+		
+		return;
+	}
+	
+	/** Draws a vertical line starting at (x, y) and of length dy, top to bottom. 	 
+	 */
+	function void drawVerticalLine(int x, int y, int dy) {
+		var int i, noOfWordsPerLastRow, wordIndex, pixelIndex;
+
+		let noOfWordsPerLastRow = x / 16;
+		let wordIndex = 32 * y + noOfWordsPerLastRow;
+		let pixelIndex = x - (16 * noOfWordsPerLastRow);
+				
+		let i = 0;
+		while(i < dy) {
+			do updateLocation(wordIndex, pixelIndex);
+			let wordIndex = wordIndex + 32;				
+			let i = i + 1;
+		}
+		
+		return;
+	}
+	
+    /** Draws a filled rectangle where the top left corner
+     *  is (x1, y1) and the bottom right corner is (x2, y2). */
+    function void drawRectangle(int x1, int y1, int x2, int y2) {
+		var int dxInPixels, dyInPixels, i, j;
+		var int noOfWordsPerLastRow, wordIndex, pixelIndex;
+		var int wordIndexOnHorizAxis, pixelIndexOnHorizAxis;
+		
+		if ((x1 > x2) | (y1 > y2) | 
+			(x1 < 0) | (x2 > 511) | (y1 < 0) | (y2 > 255)) {
+			do Sys.error(9);
+		}
+				
+		let dxInPixels = Math.abs(x2 - x1) + 1;
+		let dyInPixels = Math.abs(y2 - y1) + 1;
+
+		let noOfWordsPerLastRow = x1 / 16;
+		let wordIndex = 32 * y1 + noOfWordsPerLastRow;
+		let pixelIndex = x1 - (16 * noOfWordsPerLastRow);
+		
+		let wordIndexOnHorizAxis = wordIndex;
+		let pixelIndexOnHorizAxis = pixelIndex;
+		
+		let i = 0;
+		while (i < dxInPixels) {
+			let j = 0;
+			while (j < dyInPixels) {
+				do updateLocation(wordIndex, pixelIndex);
+				let wordIndex = wordIndex + 32;
+				let j = j + 1;
+			}
+			
+			if (pixelIndex < 15) {
+				let pixelIndexOnHorizAxis = pixelIndexOnHorizAxis + 1;				
+			}
+			else {
+				let pixelIndexOnHorizAxis = 0;
+				let wordIndexOnHorizAxis = wordIndexOnHorizAxis + 1;
+			}
+			
+			let wordIndex = wordIndexOnHorizAxis;
+			let pixelIndex = pixelIndexOnHorizAxis;
+			let i = i + 1;
+		}
+		
+		return;
+    }
+
+    /** Draws a filled circle of radius r around (cx, cy). */
+    function void drawCircle(int cx, int cy, int r) {
+		var int i, temp, sqrtValue, dInPixels, negR, doubleR;
+		
+		if ((cx < 0) | (cx > 511) | (cy < 0) | (cy > 255) |
+			(r < 0) | (r > 181)) {
+			do Sys.error(12);
+		}
+		// If circle exceeds screen limits.
+		if (((cx - r) < 0) | ((cx + r) > 511) |
+			((cy - r) < 0) | ((cy + r) > 255)) {
+			do Sys.error(13);
+		}
+		
+		let i = 0;
+		let temp = 0;
+		let negR = -r;
+		let doubleR = r + r;
+		let dInPixels = r + r + 2;
+		while (i < dInPixels) {
+			let sqrtValue = Math.sqrt(temp);
+			do drawHorizontalLine(cx - sqrtValue, cy + negR + i, sqrtValue + sqrtValue + 1);
+			let temp = temp + doubleR - i - i + 1;
+			let i = i + 1;
+		}
+		
+		return;
+    }
+}

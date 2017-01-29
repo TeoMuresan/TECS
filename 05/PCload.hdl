@@ -1,0 +1,26 @@
+// File name: projects/05/PCload.hdl
+/**
+ * Computes the value of the 'load' input for the PC chip:
+ * if (j1 && ng || j2 && zr || j3 && !(zr || ng)) set out = 1;
+ * else set out = 0.
+ * Part of the CPU architecture.
+ */
+CHIP PCload{
+	IN
+		j1, j2, j3,
+		zr, ng;
+	
+	OUT
+		out;
+		
+	PARTS:
+	Or(a=zr, b=ng, out=zrORng);
+	Not(in=zrORng, out=pz);
+	
+	And(a=j1, b=ng, out=jumpIFng);
+	And(a=j2, b=zr, out=jumpIFzr);
+	And(a=j3, b=pz, out=jumpIFpz);
+	
+	Or(a=jumpIFng, b=jumpIFzr, out=outTemp);
+	Or(a=outTemp, b=jumpIFpz, out=out);
+}

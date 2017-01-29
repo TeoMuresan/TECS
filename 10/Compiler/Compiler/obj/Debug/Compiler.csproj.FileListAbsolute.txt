@@ -1,0 +1,8 @@
+D:\Stuff\TECS\projects\10\Compiler\Compiler\bin\Debug\Compiler.exe.config
+D:\Stuff\TECS\projects\10\Compiler\Compiler\bin\Debug\Compiler.exe
+D:\Stuff\TECS\projects\10\Compiler\Compiler\bin\Debug\Compiler.pdb
+D:\Stuff\TECS\projects\10\Compiler\Compiler\obj\Debug\Compiler.csprojResolveAssemblyReference.cache
+D:\Stuff\TECS\projects\10\Compiler\Compiler\obj\Debug\Compiler.exe
+D:\Stuff\TECS\projects\10\Compiler\Compiler\obj\Debug\Compiler.pdb
+D:\Stuff\TECS\projects\10\Compiler\Compiler\bin\Debug\VM.exe
+D:\Stuff\TECS\projects\10\Compiler\Compiler\bin\Debug\VM.pdb

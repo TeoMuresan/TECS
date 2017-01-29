@@ -1,0 +1,225 @@
+/**
+ * My implementation of the Hangman game in the JACK language.
+ */
+
+class Hangman {
+	// A string array of the possible words to be guessed.
+	static Array words;
+	// A Line array of the line coordinates composing the hangman drawing.
+	static Array linesCoordinates;
+	// The number of guesses allowed for a word.
+	static int numberOfTrials;
+	// The word that is currently being played.
+	field String currentWord;
+	field int currentWordLength;
+	// A boolean array to keep track of the guessed/unguessed letters in the current word.
+	field Array currentWordMask;	
+	
+	/** Constructs a new Hangman Game. */
+    constructor Hangman new() {
+		let numberOfTrials = 10;
+		
+        let words = Array.new(9);
+		let words[0] = "MISCHIEVOUS";
+		let words[1] = "COPACETIC";
+		let words[2] = "HORRENDOUS";
+		let words[3] = "EXCRUCIATING";
+		let words[4] = "CONUNDRUM";
+		let words[5] = "ABHORRENT";
+		let words[6] = "OBNOXIOUS";
+		let words[7] = "SUBPOENA";
+		let words[8] = "PRESUMPTUOUS";
+		
+		let linesCoordinates = Array.new(numberOfTrials-1);		
+		let linesCoordinates[8] = Line.new(250,156,312,156);
+		let linesCoordinates[7] = Line.new(281,50,281,156);
+		let linesCoordinates[6] = Line.new(281,50,312,50);
+		let linesCoordinates[5] = Line.new(312,50,312,70);
+		let linesCoordinates[4] = Line.new(312,90,312,125);
+		let linesCoordinates[3] = Line.new(312,100,306,115);
+		let linesCoordinates[2] = Line.new(312,100,318,115);
+		let linesCoordinates[1] = Line.new(312,125,306,145);
+		let linesCoordinates[0] = Line.new(312,125,318,145);
+		
+        return this;
+    }
+	
+	/** Deallocates the object's memory. */
+    method void dispose() {
+		var int i;
+		let i = 0;
+		while (i < numberOfTrials-1) {
+			do Memory.deAlloc(linesCoordinates[i]);
+		}		
+		
+		do Memory.deAlloc(words);
+		do Memory.deAlloc(linesCoordinates);
+		do Memory.deAlloc(currentWordMask);
+			
+        do Memory.deAlloc(this);
+        return;
+    }
+	
+	/** Starts the game. Handles letter inputs from the user and
+	draws the hangman accordingly. */
+    method void run() {
+		var int wordIndex;
+		var char letterGuess;
+		var int hasMatch;
+		var boolean isWordGuessed;
+		var int trialCount;
+		var char input;
+        var boolean exit;	
+
+        let exit = false;
+
+		while (~exit) {			
+			let wordIndex = Keyboard.readInt("Enter a number between 1-9: ");
+			do Output.println();
+			let currentWord = words[wordIndex-1];
+			let currentWordLength = currentWord.length();
+			let currentWordMask = Array.new(currentWordLength);
+			let trialCount = numberOfTrials;
+			let isWordGuessed = false;
+			do initializeMask();					
+			
+			while (trialCount > 0) {
+				do displayCurrentPhase();
+				let letterGuess = Keyboard.readChar();
+				let hasMatch = checkForMatch(letterGuess);
+				// If no match was found
+				if (~hasMatch) {
+					// Update the number of trials left for the user.
+					let trialCount = trialCount - 1;
+					// Update the drawing accordingly.
+					do updateHangmanDrawing(trialCount);			
+				}
+				let isWordGuessed = checkForFullGuess();
+				if (isWordGuessed) {
+					let trialCount = 0;
+				}
+				do Output.println();							
+			}					
+						
+			if (isWordGuessed) {
+				// Display the whole word.
+				do displayCurrentPhase();
+				do Output.println();
+				do Output.println();
+				do Output.printString("You won!");
+			}
+			else {				
+				do Output.println();
+				do Output.println();
+				do Output.printString("You lost!");
+			}
+			do Output.println();
+			do Output.printString("Try another word? (Y/N)");
+			let input = Keyboard.readChar();
+			// If the user entered "Y", go for another round.
+			if (input = 89) {
+				do Screen.clearScreen();
+				do Output.moveCursor(0,0);
+			}
+			else {
+				let exit = true;
+			}
+			
+			do Memory.deAlloc(currentWordMask);
+		}
+		
+		return;
+	}
+	
+	/** Initializes the mask array for the current word to false
+		i.e. no letter has been guessed yet. */
+    method void initializeMask() {
+		var int i;
+		let i = 0;
+		
+		while(i < currentWordLength){
+			let currentWordMask[i] = false;
+			let i = i + 1;
+		}
+		
+		return;
+	}
+	
+	/** Prints to screen the word with the unveiled letters so far.
+		Takes the user input for the next letter guess.*/
+    method void displayCurrentPhase() {
+		var int i;
+		let i = 0;
+		while(i < currentWordLength){
+			if (currentWordMask[i]) {
+				do Output.printChar(currentWord.charAt(i));
+			}
+			else {
+				do Output.printString("_");
+			}
+			let i = i + 1;
+		}
+		
+		do Output.printString("    ");
+		
+		return;
+	}
+	
+	/** Checks if the current word contains the last letter entered by the user. */
+    method boolean checkForMatch(char letterGuess) {
+		var int i;
+		var boolean hasMatch;		
+		let i = 0;
+		let hasMatch = false;
+		
+		while (i < currentWordLength){
+			// If a match has been found:
+			if (currentWord.charAt(i) = letterGuess) {
+				// Set the corresponding mask element to "true".
+				let currentWordMask[i] = true;
+				// Remember that a match has been found.
+				let hasMatch = true;
+			}
+			let i = i + 1;
+		}	
+		
+		return hasMatch;
+	}
+	
+	/** Checks if the current word has been completely guessed by the user. */
+    method boolean checkForFullGuess() {
+		var int i;
+		var boolean isWordGuessed;		
+		let i = 0;
+		let isWordGuessed = false;
+		
+		// Check if there is any letter left unguessed.
+		while (i < currentWordLength & currentWordMask[i]) {			
+			let i = i + 1;
+		}	
+		
+		// If all letters have been guessed, the user wins.
+		if (i = currentWordLength) {
+			let isWordGuessed = true;
+		}
+		
+		return isWordGuessed;
+	}
+	
+	/** Adds the next element to the hangman drawing based on the number of trials used. */
+    method void updateHangmanDrawing(int trialCount) {
+		var Line line;
+		var int index;
+		let index = trialCount-1;
+		if (index > -1) {
+			let line = linesCoordinates[index];	
+			do Screen.drawLine(line.getX1(),line.getY1(),line.getX2(),line.getY2());
+		}
+		else {
+			// The last element to be added to the drawing is the head.
+			do Screen.drawCircle(312,80,10);
+			}
+		
+		return;
+	}
+}

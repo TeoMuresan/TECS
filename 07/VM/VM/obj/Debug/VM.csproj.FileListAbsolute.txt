@@ -1,0 +1,6 @@
+D:\Stuff\TECS\projects\07\VM\VM\bin\Debug\VM.exe.config
+D:\Stuff\TECS\projects\07\VM\VM\bin\Debug\VM.exe
+D:\Stuff\TECS\projects\07\VM\VM\bin\Debug\VM.pdb
+D:\Stuff\TECS\projects\07\VM\VM\obj\Debug\VM.csprojResolveAssemblyReference.cache
+D:\Stuff\TECS\projects\07\VM\VM\obj\Debug\VM.exe
+D:\Stuff\TECS\projects\07\VM\VM\obj\Debug\VM.pdb

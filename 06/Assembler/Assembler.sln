@@ -1,0 +1,20 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 2012
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Assembler", "Assembler\Assembler.csproj", "{3AE490F3-9C6B-425A-9ED6-2AAFC7F16628}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{3AE490F3-9C6B-425A-9ED6-2AAFC7F16628}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3AE490F3-9C6B-425A-9ED6-2AAFC7F16628}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3AE490F3-9C6B-425A-9ED6-2AAFC7F16628}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3AE490F3-9C6B-425A-9ED6-2AAFC7F16628}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

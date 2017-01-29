@@ -1,0 +1,101 @@
+// This file is part of www.nand2tetris.org
+// and the book "The Elements of Computing Systems"
+// by Nisan and Schocken, MIT Press.
+// File name: projects/12/Memory.jack
+
+/**
+ * Memory operations library.
+ */ 
+class Memory {
+	// The heap resides at RAM locations 2048-16383.
+	static Array memory;
+
+    /** Initializes memory parameters. */
+    function void init() {
+		// Create a Jack-level "proxy" of the RAM.
+		let memory = 0;
+		// 16383-2048+1=14336 (heap length).
+		// word_0 in the heap stores the heap length.
+		// word_1 in the heap stores a pointer to the next segment in the heap.
+		// But since, in the beginning, the heap is one segment, there is no next segment.
+		let memory[2048] = 14336;
+		let memory[2049] = null;
+		
+		return;
+    }
+
+    /** Returns the value of the main memory at the given address. */
+    function int peek(int address) {
+		return memory[address];
+    }
+
+    /** Sets the value of the main memory at this address
+     *  to the given value. */
+    function void poke(int address, int value) {
+		let memory[address] = value;
+		return;
+    }
+
+    /** Finds and allocates from the heap a memory block of the 
+     *  specified size and returns a reference to its base address. */
+    function int alloc(int size) {
+		var int segment, totalSize, remainderSize;
+		var boolean isSegmentFit, isLastSegment;
+		
+		if (size < 1) {
+			do Sys.error(5);
+		}
+		
+		let isSegmentFit = false;
+		let isLastSegment = false;
+		
+		// The first word of the block is used for storing the block size (for de-allocation).
+		let size = size + 1;
+		// totalSize = block_size (actual_size+1) + 2 (for segment.length and segment.next).
+		let totalSize = size + 2;
+		let segment = 2048;		
+		
+		// While a suitable segment hasn't been found and
+		// the last segment in the heap hasn't been reached.
+		while (~(isSegmentFit | (segment = null))) {
+			if (~(memory[segment] < totalSize)) {
+				let isSegmentFit = true;
+			}
+			else {
+				let segment = memory[segment + 1];
+			}
+		}
+		
+		if (~isSegmentFit) {
+			do Sys.error(6);
+		}
+		
+		// If a suitable segment has been found, the first 2 segment words are updated to reflect an available segment of length 2
+		// (this approach eliminates the need to bind the previous segment to the next segment),
+		// the block is allocated space starting from word_2 in the segment
+		// and the segment remainder (if any) becomes an available segment and comes right after the block.
+		// If the remainder is < 3, there's no point in turning it into an available segment;
+		// so the remainder is appended to the block.
+		//
+		let remainderSize = memory[segment] - size;
+		let memory[segment] = 2;		
+		
+		if (remainderSize < 3) {
+			let memory[segment + 2] = size + remainderSize;			
+		}
+		else {
+			let memory[segment + 2] = size;
+			let memory[segment + totalSize] = remainderSize;
+			let memory[segment + totalSize + 1] = memory[segment + 1];
+			let memory[segment + 1] = segment + totalSize;
+		}
+		
+		return segment + 3;
+    }
+
+    /** De-allocates the given object and frees its space. */
+    function void deAlloc(int object) {
+		let memory[object - 3] = memory[object - 1];
+		return;
+    }    
+}

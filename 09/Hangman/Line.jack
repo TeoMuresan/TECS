@@ -1,0 +1,25 @@
+/**
+ * Class that holds the coordinates for drawing a line.
+ */
+class Line {
+	field int x1;
+	field int y1;
+	field int x2;
+	field int y2;
+
+    /** Constructs a new Line. */
+    constructor Line new(int Ax1, int Ay1, int Ax2, int Ay2) {
+		let x1 = Ax1;
+		let y1 = Ay1;
+		let x2 = Ax2;
+		let y2 = Ay2;
+		
+		return this;
+    }
+	
+	/** Accessors. */
+	method int getX1() { return x1; }
+	method int getY1() { return y1; }
+	method int getX2() { return x2; }
+	method int getY2() { return y2; }
+}

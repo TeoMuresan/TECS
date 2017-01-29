@@ -1,0 +1,57 @@
+// This file is part of www.nand2tetris.org
+// and the book "The Elements of Computing Systems"
+// by Nisan and Schocken, MIT Press.
+// File name: projects/01/DMux8Way.hdl
+
+/**
+ * 8-way demultiplexor:
+ * {a, b, c, d, e, f, g, h} = {in, 0, 0, 0, 0, 0, 0, 0} if sel == 000
+ *                            {0, in, 0, 0, 0, 0, 0, 0} if sel == 001
+ *                            etc.
+ *                            {0, 0, 0, 0, 0, 0, 0, in} if sel == 111
+ */
+
+CHIP DMux8Way {
+    IN in, sel[3];
+    OUT a, b, c, d, e, f, g, h;
+
+    PARTS:
+    Nand(a=sel[0], b=sel[0], out=notsel0);
+	Nand(a=sel[1], b=sel[1], out=notsel1);
+	Nand(a=sel[2], b=sel[2], out=notsel2);
+
+	Nand(a=in, b=notsel2, out=mux0a);
+	Nand(a=in, b=sel[2], out=mux1a);
+	Nand(a=mux0a, b=mux0a, out=mux0);
+	Nand(a=mux1a, b=mux1a, out=mux1);
+	
+	Nand(a=notsel0, b=notsel1, out=r1g1);
+	Nand(a=sel[0], b=notsel1, out=r1g2);
+	Nand(a=sel[1], b=notsel0, out=r1g3);
+	Nand(a=sel[0], b=sel[1], out=r1g4);
+
+	Nand(a=r1g1, b=r1g1, out=r2g1);
+	Nand(a=r1g2, b=r1g2, out=r2g2);
+	Nand(a=r1g3, b=r1g3, out=r2g3);
+	Nand(a=r1g4, b=r1g4, out=r2g4);
+
+	Nand(a=mux0, b=r2g1, out=r3g1a);
+	Nand(a=mux0, b=r2g2, out=r3g2a);
+	Nand(a=mux0, b=r2g3, out=r3g3a);
+	Nand(a=mux0, b=r2g4, out=r3g4a);
+
+	Nand(a=r3g1a, b=r3g1a, out=a);
+	Nand(a=r3g2a, b=r3g2a, out=b);
+	Nand(a=r3g3a, b=r3g3a, out=c);
+	Nand(a=r3g4a, b=r3g4a, out=d);
+
+	Nand(a=mux1, b=r2g1, out=r3g1b);
+	Nand(a=mux1, b=r2g2, out=r3g2b);
+	Nand(a=mux1, b=r2g3, out=r3g3b);
+	Nand(a=mux1, b=r2g4, out=r3g4b);
+
+	Nand(a=r3g1b, b=r3g1b, out=e);
+	Nand(a=r3g2b, b=r3g2b, out=f);
+	Nand(a=r3g3b, b=r3g3b, out=g);
+	Nand(a=r3g4b, b=r3g4b, out=h);
+}

@@ -1,0 +1,19 @@
+// File name: projects/02/NotOr16.hdl
+/**
+ * Zeroes or negates a 16-bit input: 
+ * if (z == 1) set in = 0        // 16-bit constant
+ * if (n == 1) set in = !in     // bitwise not
+ * Part of the ALU architecture.
+ */
+CHIP NotOrZero16{
+	IN
+		in[16],
+		z, n;
+	
+	OUT
+		out[16];
+		
+	PARTS:
+	Not16(in=in, out=nin);
+	Mux4Way16(a=in, b=nin, c=false, d=true, sel[0]=n, sel[1]=z, out=out);
+}
